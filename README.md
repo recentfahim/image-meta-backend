@@ -29,7 +29,7 @@ $ php artisan serve
 **Status Code:** ```200 OK```
 
 **Response:**
-```
+```JSON
 {
     "result": {
         "exif_data": {
