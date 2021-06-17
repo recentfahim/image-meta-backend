@@ -7,12 +7,20 @@ It takes image or image url as user input and return the meta information contai
 
 ## Build Setup
 
+Modify ```.env`` file with database credentials
+
 ```bash
 # install dependencies
 $ composer install
 
 # regenerates the list of all classes that need to be included in the project
 $ composer dump-autoload
+
+# create database tables
+$ php artisan migrate
+
+# to create symbolic link with storage and public
+$ php artisan storage:link
 
 # serve application at localhost:8000 
 $ php artisan serve
