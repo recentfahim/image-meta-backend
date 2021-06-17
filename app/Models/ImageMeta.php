@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class ImageMeta extends Model
 {
-    protected $table = 'image_metas';
+    protected $table = 'image_meta';
 }
