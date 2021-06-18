@@ -43,12 +43,16 @@ class ImageMetaController extends Controller
             $url = $request->image_url;
             $contents = Image::make($url);
             $name = substr($url, strrpos($url, '/') + 1);
-            Storage::disk('public')->put($name, $contents);
+
             $metas = $this->ImageMeta($contents, $name);
+
+            $destinationPath = public_path().'/images/' ;
+            $contents->store('images', 'public');
+            $contents->move($destinationPath, $name);
 
             $image_meta = new ImageMeta();
 
-            $image_meta->image_path = 'storage/public/images/'.$name;
+            $image_meta->image_path = '/public/images/'.$name;
             $image_meta->authorandcopyright = $metas['result']['iptc_data'];
             $image_meta->camera_info = $metas['result']['camera_info'];
             $image_meta->exif = $metas['result']['exif_info'];
@@ -57,14 +61,19 @@ class ImageMetaController extends Controller
             return response()->json($metas, 200);
         }
 
-        if($request->image){
-            $name = $request->image->getClientOriginalName();
-            Storage::disk('public')->put($name, $request->image);
-            $metas = $this->ImageMeta($request->image, $name);
+        if($request->hasFile('image')){
+            $image = $request->file('image');
+            $image_name = $image->getClientOriginalName();
+
+            $metas = $this->ImageMeta($request->image, $image_name);
+
+            $destinationPath = public_path().'/images/' ;
+            $image->store('images', 'public');
+            $image->move($destinationPath, $image_name);
 
             $image_meta = new ImageMeta();
 
-            $image_meta->image_path = 'storage/public/images/'.$name;
+            $image_meta->image_path = '/public/images/'.$image_name;
             $image_meta->authorandcopyright = json_encode($metas['result']['iptc_data']);
             $image_meta->camera_info = json_encode($metas['result']['camera_info']);
             $image_meta->exif = json_encode($metas['result']['exif_data']);
