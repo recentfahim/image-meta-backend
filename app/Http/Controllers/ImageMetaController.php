@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Exception;
 use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Intervention\Image\ImageManagerStatic as Image;
 use Illuminate\Support\Facades\Storage;
 use App\Models\ImageMeta;
@@ -41,21 +40,19 @@ class ImageMetaController extends Controller
     public function ExtractImageMeta(Request $request){
         if($request->image_url){
             $url = $request->image_url;
-            $contents = Image::make($url);
+            $contents = file_get_contents($url);
             $name = substr($url, strrpos($url, '/') + 1);
+            $image = Image::make($contents);
 
-            $metas = $this->ImageMeta($contents, $name);
-
-            $destinationPath = public_path().'/images/' ;
-            $contents->store('images', 'public');
-            $contents->move($destinationPath, $name);
+            $metas = $this->ImageMeta($image, $name);
+            $image->save(public_path('/images/' . $name));
 
             $image_meta = new ImageMeta();
 
             $image_meta->image_path = '/public/images/'.$name;
-            $image_meta->authorandcopyright = $metas['result']['iptc_data'];
-            $image_meta->camera_info = $metas['result']['camera_info'];
-            $image_meta->exif = $metas['result']['exif_info'];
+            $image_meta->authorandcopyright = json_encode($metas['result']['iptc_data']);
+            $image_meta->camera_info = json_encode($metas['result']['camera_info']);
+            $image_meta->exif = json_encode($metas['result']['exif_data']);
             $image_meta->save();
 
             return response()->json($metas, 200);
